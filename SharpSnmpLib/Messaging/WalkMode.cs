@@ -27,9 +27,8 @@
  */
 namespace Lextm.SharpSnmpLib.Messaging
 {
-    using System;
     using System.Runtime.Serialization;
-    
+
     /// <summary>
     /// Walk mode.
     /// </summary>

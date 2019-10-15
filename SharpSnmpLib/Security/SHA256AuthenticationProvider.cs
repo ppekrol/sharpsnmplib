@@ -18,7 +18,6 @@
 // DEALINGS IN THE SOFTWARE.
 #if !NETFX_CORE
 using System;
-using System.Globalization;
 using System.IO;
 
 using System.Security.Cryptography;

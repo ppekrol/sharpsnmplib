@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Lextm.SharpSnmpLib.Security
 {
@@ -127,7 +124,7 @@ namespace Lextm.SharpSnmpLib.Security
         /// <returns>True if reached capacity false otherwise</returns>
         private bool IsCacheFull()
         {
-            return _keyQueue.Count() >= _capacity;      //using >= instead of == in case someone doesn't syncronize Cache
+            return _keyQueue.Count >= _capacity;      //using >= instead of == in case someone doesn't syncronize Cache
         }
 
         #endregion //Private_Methods
