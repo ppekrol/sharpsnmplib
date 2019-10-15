@@ -24,6 +24,7 @@ using System.Net.Sockets;
 using System.Threading;
 using Lextm.SharpSnmpLib.Security;
 using System.Threading.Tasks;
+using System.Buffers;
 
 namespace Lextm.SharpSnmpLib.Messaging
 {
@@ -65,7 +66,7 @@ namespace Lextm.SharpSnmpLib.Messaging
             {
                 throw new ArgumentNullException(nameof(broadcastAddress));
             }
-            
+
             if (version != VersionCode.V3 && community == null)
             {
                 throw new ArgumentNullException(nameof(community));
@@ -214,10 +215,12 @@ namespace Lextm.SharpSnmpLib.Messaging
 
                 try
                 {
-                    var buffer = new byte[_bufferSize];
+                    var buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
                     EndPoint remote = new IPEndPoint(IPAddress.Any, 0);
                     var count = socket.ReceiveFrom(buffer, ref remote);
-                    Task.Factory.StartNew(()=> HandleMessage(buffer, count, (IPEndPoint)remote));
+                    Task.Factory
+                        .StartNew(() => HandleMessage(buffer, count, (IPEndPoint)remote))
+                        .ContinueWith(_ => ArrayPool<byte>.Shared.Return(buffer));
                 }
                 catch (SocketException ex)
                 {
@@ -372,7 +375,7 @@ namespace Lextm.SharpSnmpLib.Messaging
                 }
 
                 int count;
-                var reply = new byte[_bufferSize];
+                var reply = ArrayPool<byte>.Shared.Rent(_bufferSize);
                 var args = SocketExtension.EventArgsFactory.Create();
                 try
                 {
@@ -384,7 +387,9 @@ namespace Lextm.SharpSnmpLib.Messaging
                         count = await socket.ReceiveMessageFromAsync(awaitable);
                     }
 
-                    await Task.Factory.StartNew(() => HandleMessage(reply, count, (IPEndPoint) args.RemoteEndPoint))
+                    await Task.Factory
+                        .StartNew(() => HandleMessage(reply, count, (IPEndPoint)args.RemoteEndPoint))
+                        .ContinueWith(_ => ArrayPool<byte>.Shared.Return(reply))
                         .ConfigureAwait(false);
                 }
                 catch (SocketException ex)
