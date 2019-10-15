@@ -330,27 +330,49 @@ namespace Lextm.SharpSnmpLib
             }
 
             // TODO: improve here.
-            var temp = new List<byte>();
-            var first = (byte)((40 * _oid[0]) + _oid[1]);
-            temp.Add(first);
-            for (var i = 2; i < _oid.Length; i++)
-            {
-                temp.AddRange(ConvertToBytes(_oid[i]));
-            }
+            var temp = Pools.GetByteList();
 
-            return _raw = temp.ToArray();
+            try
+            {
+                var first = (byte)((40 * _oid[0]) + _oid[1]);
+                temp.Add(first);
+                for (var i = 2; i < _oid.Length; i++)
+                {
+                    temp.AddRange(ConvertToBytes(_oid[i]));
+                }
+
+                return _raw = temp.ToArray();
+            }
+            finally
+            {
+                Pools.ReturnByteList(temp);
+            }
         }
 
         private static IEnumerable<byte> ConvertToBytes(uint subIdentifier)
         {
-            var result = new List<byte> { (byte)(subIdentifier & 0x7F) };
-            while ((subIdentifier = subIdentifier >> 7) > 0)
-            {
-                result.Add((byte)((subIdentifier & 0x7F) | 0x80));
-            }
+            var result = Pools.GetByteList();
 
-            result.Reverse();
-            return result;
+            try
+            {
+                result.Add((byte)(subIdentifier & 0x7F));
+
+                while ((subIdentifier = subIdentifier >> 7) > 0)
+                {
+                    result.Add((byte)((subIdentifier & 0x7F) | 0x80));
+                }
+
+                result.Reverse();
+
+                foreach (var r in result)
+                {
+                    yield return r;
+                }
+            }
+            finally
+            {
+                Pools.ReturnByteList(result);
+            }
         }
 
         /// <summary>

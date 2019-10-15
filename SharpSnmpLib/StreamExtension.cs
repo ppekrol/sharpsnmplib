@@ -35,32 +35,40 @@ namespace Lextm.SharpSnmpLib
                 throw new ArgumentNullException(nameof(stream));
             }
 
-            var list = new List<byte>();
-            var first = stream.ReadByte();
-            var firstByte = (byte)first;
-            if ((firstByte & 0x80) == 0)
-            {
-                return new Tuple<int, byte[]>(first, new[] { firstByte });
-            }
+            var list = Pools.GetByteList();
 
-            list.Add(firstByte);
-            
-            var result = 0;
-            var octets = firstByte & 0x7f;
-            for (var j = 0; j < octets; j++)
+            try
             {
-                var n = stream.ReadByte();
-                if (n == -1)
+                var first = stream.ReadByte();
+                var firstByte = (byte)first;
+                if ((firstByte & 0x80) == 0)
                 {
-                    throw new SnmpException("BER end of file");
+                    return new Tuple<int, byte[]>(first, new[] { firstByte });
                 }
 
-                var nextByte = (byte)n;
-                result = (result << 8) + nextByte;
-                list.Add(nextByte);
+                list.Add(firstByte);
+
+                var result = 0;
+                var octets = firstByte & 0x7f;
+                for (var j = 0; j < octets; j++)
+                {
+                    var n = stream.ReadByte();
+                    if (n == -1)
+                    {
+                        throw new SnmpException("BER end of file");
+                    }
+
+                    var nextByte = (byte)n;
+                    result = (result << 8) + nextByte;
+                    list.Add(nextByte);
+                }
+
+                return new Tuple<int, byte[]>(result, list.ToArray());
             }
-            
-            return new Tuple<int, byte[]>(result, list.ToArray());
+            finally
+            {
+                Pools.ReturnByteList(list);
+            }
         }
 
         internal static void IgnoreBytes(this Stream stream, int length)

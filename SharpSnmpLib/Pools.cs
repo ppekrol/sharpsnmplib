@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.ObjectPool;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Lextm.SharpSnmpLib
 {
@@ -10,7 +11,11 @@ namespace Lextm.SharpSnmpLib
 
         public static List<byte> GetByteList()
         {
-            return ByteListPool.Get();
+            var list = ByteListPool.Get();
+
+            Debug.Assert(list.Count == 0);
+
+            return list;
         }
 
         public static void ReturnByteList(List<byte> list)
