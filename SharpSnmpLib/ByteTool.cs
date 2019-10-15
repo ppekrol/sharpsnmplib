@@ -148,26 +148,75 @@ namespace Lextm.SharpSnmpLib
             return BitConverter.ToString(buffer).Replace('-', ' ');
         }
 
-        internal static byte[] ParseItems(params ISnmpData[] items)
+        internal static byte[] ParseItems(ISnmpData item1, ISnmpData item2, ISnmpData item3, ISnmpData item4)
         {
-            if (items == null)
+            var buffer = ArrayPool<byte>.Shared.Rent(1024 * 1024);
+
+            using (var result = new MemoryStream(buffer, 0, buffer.Length))
             {
-                throw new ArgumentNullException(nameof(items));
+                try
+                {
+                    AppendBytesTo(item1, result);
+                    AppendBytesTo(item2, result);
+                    AppendBytesTo(item3, result);
+                    AppendBytesTo(item4, result);
+
+                    var array = new byte[result.Position];
+                    Buffer.BlockCopy(buffer, 0, array, 0, array.Length);
+
+                    return array;
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
             }
 
-            using (var result = new MemoryStream())
+            void AppendBytesTo(ISnmpData item, MemoryStream result)
             {
-                foreach (var item in items)
+                if (item == null)
                 {
-                    if (item == null)
-                    {
-                        throw new ArgumentException("Item in the collection cannot be null.", nameof(items));
-                    }
-
-                    item.AppendBytesTo(result);
+                    throw new ArgumentException("Item in the collection cannot be null.", nameof(item));
                 }
 
-                return result.ToArray();
+                item.AppendBytesTo(result);
+            }
+        }
+
+        internal static byte[] ParseItems(ISnmpData item1, ISnmpData item2, ISnmpData item3, ISnmpData item4, ISnmpData item5, ISnmpData item6)
+        {
+            var buffer = ArrayPool<byte>.Shared.Rent(1024 * 1024);
+
+            using (var result = new MemoryStream(buffer, 0, buffer.Length))
+            {
+                try
+                {
+                    AppendBytesTo(item1, result);
+                    AppendBytesTo(item2, result);
+                    AppendBytesTo(item3, result);
+                    AppendBytesTo(item4, result);
+                    AppendBytesTo(item5, result);
+                    AppendBytesTo(item6, result);
+
+                    var array = new byte[result.Position];
+                    Buffer.BlockCopy(buffer, 0, array, 0, array.Length);
+
+                    return array;
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
+            }
+
+            void AppendBytesTo(ISnmpData item, MemoryStream result)
+            {
+                if (item == null)
+                {
+                    throw new ArgumentException("Item in the collection cannot be null.", nameof(item));
+                }
+
+                item.AppendBytesTo(result);
             }
         }
 
@@ -178,14 +227,26 @@ namespace Lextm.SharpSnmpLib
                 throw new ArgumentNullException(nameof(items));
             }
 
-            using (var result = new MemoryStream())
-            {
-                foreach (var item in items)
-                {
-                    item.AppendBytesTo(result);
-                }
+            var buffer = ArrayPool<byte>.Shared.Rent(1024 * 1024);
 
-                return result.ToArray();
+            using (var result = new MemoryStream(buffer, 0, buffer.Length))
+            {
+                try
+                {
+                    foreach (var item in items)
+                    {
+                        item.AppendBytesTo(result);
+                    }
+
+                    var array = new byte[result.Position];
+                    Buffer.BlockCopy(buffer, 0, array, 0, array.Length);
+
+                    return array;
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
             }
         }
 

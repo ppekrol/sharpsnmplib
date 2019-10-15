@@ -24,7 +24,7 @@ namespace Lextm.SharpSnmpLib.Unit
             Assert.Throws<ArgumentNullException>(() => ByteTool.ConvertDecimal(null));
             Assert.Throws<ArgumentNullException>(() => ByteTool.Convert((byte[])null));
             Assert.Throws<ArgumentNullException>(() => ByteTool.ParseItems(null));
-            Assert.Throws<ArgumentException>(() => ByteTool.ParseItems((ISnmpData)null));
+            Assert.Throws<ArgumentException>(() => ByteTool.ParseItems((ISnmpData)null, (ISnmpData)null, (ISnmpData)null, (ISnmpData)null));
             Assert.Throws<ArgumentNullException>(() => ByteTool.ParseItems((IEnumerable<ISnmpData>)null));
             Assert.Throws<ArgumentNullException>(() => ByteTool.Convert((string)null));
             Assert.Throws<ArgumentException>(() => ByteTool.Convert("**"));
