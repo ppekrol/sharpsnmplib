@@ -128,5 +128,9 @@ namespace Lextm.SharpSnmpLib.Messaging
         {
             return string.Format(CultureInfo.InvariantCulture, "REPORT request message: version: {0}; {1}; {2}", Version, Parameters.UserName, Scope.Pdu);
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

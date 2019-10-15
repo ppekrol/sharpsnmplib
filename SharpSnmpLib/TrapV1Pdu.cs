@@ -55,7 +55,7 @@ namespace Lextm.SharpSnmpLib
         /// <param name="timestamp">Time stamp</param>
         /// <param name="variables">Variable binds</param>
         [CLSCompliant(false)]
-        public TrapV1Pdu(uint[] enterprise, IP agent, Integer32 generic, Integer32 specific, TimeTicks timestamp, IList<Variable> variables)
+        public TrapV1Pdu(uint[] enterprise, IP agent, Integer32 generic, Integer32 specific, TimeTicks timestamp, List<Variable> variables)
             : this(new ObjectIdentifier(enterprise), agent, generic, specific, timestamp, variables) 
         {
         }
@@ -69,7 +69,7 @@ namespace Lextm.SharpSnmpLib
         /// <param name="specific">Specific trap type</param>
         /// <param name="timestamp">Time stamp</param>
         /// <param name="variables">Variable binds</param>
-        public TrapV1Pdu(ObjectIdentifier enterprise, IP agent, Integer32 generic, Integer32 specific, TimeTicks timestamp, IList<Variable> variables)
+        public TrapV1Pdu(ObjectIdentifier enterprise, IP agent, Integer32 generic, Integer32 specific, TimeTicks timestamp, List<Variable> variables)
         {
             if (enterprise == null)
             {
@@ -229,7 +229,7 @@ namespace Lextm.SharpSnmpLib
         /// <summary>
         /// Variable binds.
         /// </summary>
-        public IList<Variable> Variables { get; private set; }
+        public List<Variable> Variables { get; private set; }
 
         /// <summary>
         /// Returns a <see cref="string"/> that represents this <see cref="TrapV1Pdu"/>.
@@ -246,6 +246,10 @@ namespace Lextm.SharpSnmpLib
                 Generic,
                 Specific.ToString(CultureInfo.InvariantCulture),
                 Variables.Count.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

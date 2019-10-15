@@ -49,7 +49,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="time">Time ticks.</param>
         /// <param name="variables">Variables.</param>
         [CLSCompliant(false)]
-        public InformRequestMessage(int requestId, VersionCode version, OctetString community, ObjectIdentifier enterprise, uint time, IList<Variable> variables)
+        public InformRequestMessage(int requestId, VersionCode version, OctetString community, ObjectIdentifier enterprise, uint time, List<Variable> variables)
         {
             if (variables == null)
             {
@@ -101,7 +101,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="report">The report.</param>
         [CLSCompliant(false)]
         [Obsolete("Please use other overloading ones.")]
-        public InformRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, ObjectIdentifier enterprise, uint time, IList<Variable> variables, IPrivacyProvider privacy, ISnmpMessage report)
+        public InformRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, ObjectIdentifier enterprise, uint time, List<Variable> variables, IPrivacyProvider privacy, ISnmpMessage report)
             : this(version, messageId, requestId, userName, enterprise, time, variables, privacy, 0xFFE3, report)
         {
         }
@@ -120,7 +120,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="maxMessageSize">Size of the max message.</param>
         /// <param name="report">The report.</param>
         [CLSCompliant(false)]
-        public InformRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, ObjectIdentifier enterprise, uint time, IList<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, ISnmpMessage report)
+        public InformRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, ObjectIdentifier enterprise, uint time, List<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, ISnmpMessage report)
             : this(version, messageId, requestId, userName, OctetString.Empty, enterprise, time, variables, privacy, maxMessageSize, report)
         { }
         /// <summary>
@@ -138,7 +138,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="maxMessageSize">Size of the max message.</param>
         /// <param name="report">The report.</param>
         [CLSCompliant(false)]
-        public InformRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, OctetString contextName, ObjectIdentifier enterprise, uint time, IList<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, ISnmpMessage report)
+        public InformRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, OctetString contextName, ObjectIdentifier enterprise, uint time, List<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, ISnmpMessage report)
         {
             if (userName == null)
             {
@@ -300,6 +300,10 @@ namespace Lextm.SharpSnmpLib.Messaging
                 this.Community(),
                 Enterprise,
                 this.Variables().Count.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

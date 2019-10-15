@@ -123,5 +123,9 @@ namespace Lextm.SharpSnmpLib.Messaging
         {
             return string.Format(CultureInfo.InvariantCulture, "Malformed message: message id: {0}; user: {1}", this.MessageId(), Parameters.UserName);
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

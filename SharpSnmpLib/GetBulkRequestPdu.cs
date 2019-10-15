@@ -49,7 +49,7 @@ namespace Lextm.SharpSnmpLib
         /// <param name="nonRepeaters">Non-repeaters.</param>
         /// <param name="maxRepetitions">Max repetitions.</param>
         /// <param name="variables">Variables.</param>
-        public GetBulkRequestPdu(int requestId, int nonRepeaters, int maxRepetitions, IList<Variable> variables)
+        public GetBulkRequestPdu(int requestId, int nonRepeaters, int maxRepetitions, List<Variable> variables)
         {
             if (variables == null)
             {
@@ -109,7 +109,7 @@ namespace Lextm.SharpSnmpLib
         /// <summary>
         /// Variables.
         /// </summary>
-        public IList<Variable> Variables { get; private set; }
+        public List<Variable> Variables { get; private set; }
 
         #region ISnmpData Members
         /// <summary>
@@ -154,6 +154,10 @@ namespace Lextm.SharpSnmpLib
                 ErrorStatus, 
                 ErrorIndex, 
                 Variables.Count.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

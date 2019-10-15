@@ -131,7 +131,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="community">Community name.</param>
         /// <param name="variables">Variable binds.</param>
         /// <returns></returns>
-        public IList<Variable> Get(IPEndPoint endpoint, string community, IList<Variable> variables)
+        public IList<Variable> Get(IPEndPoint endpoint, string community, List<Variable> variables)
         {
             return Messenger.Get(_version, endpoint, new OctetString(community), variables, _timeout);
         }
@@ -143,7 +143,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="community">Community name.</param>
         /// <param name="variables">Variable binds.</param>
         /// <returns></returns>
-        public IList<Variable> Get(string address, string community, IList<Variable> variables)
+        public IList<Variable> Get(string address, string community, List<Variable> variables)
         {
             return Get(IPAddress.Parse(address), community, variables);
         }
@@ -155,7 +155,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="community">Community name.</param>
         /// <param name="variables">Variable binds.</param>
         /// <returns></returns>
-        public IList<Variable> Get(IPAddress address, string community, IList<Variable> variables)
+        public IList<Variable> Get(IPAddress address, string community, List<Variable> variables)
         {
             return Get(new IPEndPoint(address, DefaultPort), community, variables);
         }
@@ -204,7 +204,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="community">Community name.</param>
         /// <param name="variables">Variable binds.</param>
         /// <returns></returns>
-        public IList<Variable> Set(IPEndPoint endpoint, string community, IList<Variable> variables)
+        public IList<Variable> Set(IPEndPoint endpoint, string community, List<Variable> variables)
         {
             return Messenger.Set(_version, endpoint, new OctetString(community), variables, _timeout);
         }
@@ -216,7 +216,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="community">Community name.</param>
         /// <param name="variables">Variable binds.</param>
         /// <returns></returns>
-        public IList<Variable> Set(string address, string community, IList<Variable> variables)
+        public IList<Variable> Set(string address, string community, List<Variable> variables)
         {
             return Set(IPAddress.Parse(address), community, variables);
         }
@@ -228,7 +228,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="community">Community name.</param>
         /// <param name="variables">Variable binds.</param>
         /// <returns></returns>
-        public IList<Variable> Set(IPAddress address, string community, IList<Variable> variables)
+        public IList<Variable> Set(IPAddress address, string community, List<Variable> variables)
         {
             return Set(new IPEndPoint(address, DefaultPort), community, variables);
         }

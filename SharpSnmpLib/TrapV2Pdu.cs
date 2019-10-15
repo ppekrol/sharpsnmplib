@@ -45,7 +45,7 @@ namespace Lextm.SharpSnmpLib
         /// <param name="time">Time stamp.</param>
         /// <param name="variables">Variables.</param>
         [CLSCompliant(false)]
-        public TrapV2Pdu(int requestId, ObjectIdentifier enterprise, uint time, IList<Variable> variables)
+        public TrapV2Pdu(int requestId, ObjectIdentifier enterprise, uint time, List<Variable> variables)
         {
             if (enterprise == null)
             {
@@ -105,7 +105,7 @@ namespace Lextm.SharpSnmpLib
         /// <summary>
         /// Variables.
         /// </summary>
-        public IList<Variable> Variables { get; private set; }
+        public List<Variable> Variables { get; private set; }
 
         /// <summary>
         /// Gets the request ID.
@@ -191,6 +191,10 @@ namespace Lextm.SharpSnmpLib
                 _time, 
                 Variables.Count.ToString(CultureInfo.InvariantCulture),
                 RequestId);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

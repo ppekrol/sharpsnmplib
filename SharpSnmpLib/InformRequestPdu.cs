@@ -53,7 +53,7 @@ namespace Lextm.SharpSnmpLib
         /// <param name="time">Time stamp</param>
         /// <param name="variables">Variables</param>
         [CLSCompliant(false)]
-        public InformRequestPdu(int requestId, ObjectIdentifier enterprise, uint time, IList<Variable> variables)
+        public InformRequestPdu(int requestId, ObjectIdentifier enterprise, uint time, List<Variable> variables)
         {
             if (enterprise == null)
             {
@@ -161,7 +161,7 @@ namespace Lextm.SharpSnmpLib
         /// <summary>
         /// Variables.
         /// </summary>
-        public IList<Variable> Variables { get; private set; }
+        public List<Variable> Variables { get; private set; }
 
         #region ISnmpData Members
         /// <summary>
@@ -223,6 +223,10 @@ namespace Lextm.SharpSnmpLib
                 Enterprise,
                 _time,
                 Variables.Count.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

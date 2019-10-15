@@ -47,7 +47,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="version">Protocol version</param>
         /// <param name="community">Community name</param>
         /// <param name="variables">Variables</param>
-        public GetNextRequestMessage(int requestId, VersionCode version, OctetString community, IList<Variable> variables)
+        public GetNextRequestMessage(int requestId, VersionCode version, OctetString community, List<Variable> variables)
         {
             if (variables == null)
             {
@@ -87,7 +87,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="privacy">The privacy provider.</param>
         /// <param name="report">The report.</param>
         [Obsolete("Please use other overloading ones.")]
-        public GetNextRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, IList<Variable> variables, IPrivacyProvider privacy, ISnmpMessage report)
+        public GetNextRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, List<Variable> variables, IPrivacyProvider privacy, ISnmpMessage report)
             : this(version, messageId, requestId, userName, variables, privacy, 0xFFE3, report)
         {
         }
@@ -104,7 +104,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="privacy">The privacy provider.</param>
         /// <param name="maxMessageSize">Size of the max message.</param>
         /// <param name="report">The report.</param>
-        public GetNextRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName,OctetString contextName, IList<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, ISnmpMessage report)
+        public GetNextRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName,OctetString contextName, List<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, ISnmpMessage report)
         {
             if (variables == null)
             {
@@ -172,7 +172,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="privacy">The privacy provider.</param>
         /// <param name="maxMessageSize">Size of the max message.</param>
         /// <param name="report">The report.</param>
-        public GetNextRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, IList<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, ISnmpMessage report)
+        public GetNextRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, List<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, ISnmpMessage report)
             : this(version, messageId, requestId, userName, OctetString.Empty, variables, privacy, maxMessageSize, report)
         {}
 
@@ -252,6 +252,10 @@ namespace Lextm.SharpSnmpLib.Messaging
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture, "GET NEXT request message: version: {0}; {1}; {2}", Version, Parameters.UserName, Scope.Pdu);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

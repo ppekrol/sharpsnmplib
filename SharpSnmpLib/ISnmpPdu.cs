@@ -17,6 +17,7 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 
 namespace Lextm.SharpSnmpLib
@@ -25,7 +26,7 @@ namespace Lextm.SharpSnmpLib
     /// SNMP PDU.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Pdu")]
-    public interface ISnmpPdu : ISnmpData
+    public interface ISnmpPdu : ISnmpData, IDisposable
     {
         /// <summary>
         /// Gets the request ID.
@@ -48,7 +49,7 @@ namespace Lextm.SharpSnmpLib
         /// <summary>
         /// Variable bindings.
         /// </summary>
-        IList<Variable> Variables 
+        List<Variable> Variables 
         { 
             get; 
         }

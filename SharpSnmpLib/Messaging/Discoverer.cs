@@ -37,7 +37,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         private int _bufferSize;
         private int _requestId;
         private static readonly UserRegistry Empty = new UserRegistry();
-        private readonly IList<Variable> _defaultVariables = new List<Variable> { new Variable(new ObjectIdentifier(new uint[] { 1, 3, 6, 1, 2, 1, 1, 1, 0 })) };
+        private readonly List<Variable> _defaultVariables = new List<Variable> { new Variable(new ObjectIdentifier(new uint[] { 1, 3, 6, 1, 2, 1, 1, 1, 0 })) };
         private const int Active = 1;
         private const int Inactive = 0;
 

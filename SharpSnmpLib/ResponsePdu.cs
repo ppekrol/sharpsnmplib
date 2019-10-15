@@ -50,7 +50,7 @@ namespace Lextm.SharpSnmpLib
         /// <param name="errorStatus">Error status.</param>
         /// <param name="errorIndex">Error index.</param>
         /// <param name="variables">Variables.</param>
-        public ResponsePdu(int requestId, ErrorCode errorStatus, int errorIndex, IList<Variable> variables)
+        public ResponsePdu(int requestId, ErrorCode errorStatus, int errorIndex, List<Variable> variables)
         {
             if (variables == null)
             {
@@ -108,7 +108,7 @@ namespace Lextm.SharpSnmpLib
         /// <summary>
         /// Variables.
         /// </summary>
-        public IList<Variable> Variables { get; private set; }
+        public List<Variable> Variables { get; private set; }
 
         /// <summary>
         /// Type code.
@@ -153,6 +153,24 @@ namespace Lextm.SharpSnmpLib
                 ErrorStatus,
                 ErrorIndex,
                 Variables.Count.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private bool _disposed;
+
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            lock (this)
+            {
+                if (_disposed)
+                    return;
+
+                _disposed = true;
+
+                Pools.ReturnVariableList(Variables);
+            }
         }
     }
 }

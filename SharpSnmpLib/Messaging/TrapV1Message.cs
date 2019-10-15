@@ -55,7 +55,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="time">Time</param>
         /// <param name="variables">Variables</param>
         [CLSCompliant(false)]
-        public TrapV1Message(VersionCode version, IPAddress agent, OctetString community, ObjectIdentifier enterprise, GenericCode generic, int specific, uint time, IList<Variable> variables)
+        public TrapV1Message(VersionCode version, IPAddress agent, OctetString community, ObjectIdentifier enterprise, GenericCode generic, int specific, uint time, List<Variable> variables)
         {
             if (variables == null)
             {
@@ -256,6 +256,10 @@ namespace Lextm.SharpSnmpLib.Messaging
             var collection = new List<ISnmpData>(1 + data.Length) { new Integer32((int)version) };
             collection.AddRange(data);
             return new Sequence(collection);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

@@ -100,14 +100,14 @@ namespace Lextm.SharpSnmpLib
         /// </summary>
         /// <param name="varbindSection"></param>
         /// <returns></returns>
-        internal static IList<Variable> Transform(Sequence varbindSection)
+        internal static List<Variable> Transform(Sequence varbindSection)
         {
             if (varbindSection == null)
             {
                 throw new ArgumentNullException(nameof(varbindSection));
             }
 
-            IList<Variable> result = new List<Variable>(varbindSection.Length);
+            List<Variable> result = new List<Variable>(varbindSection.Length);
             foreach (ISnmpData item in varbindSection)
             {
                 if (item.TypeCode != SnmpType.Sequence)
