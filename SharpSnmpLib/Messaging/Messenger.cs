@@ -85,7 +85,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="community">Community name.</param>
         /// <param name="variables">Variable binds.</param>
         /// <returns></returns>
-        public static async Task<IList<Variable>> GetAsync(VersionCode version, IPEndPoint endpoint, OctetString community, IList<Variable> variables)
+        public static async Task<IList<Variable>> GetAsync(VersionCode version, IPEndPoint endpoint, OctetString community, List<Variable> variables)
         {
             if (endpoint == null)
             {
@@ -129,7 +129,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="community">Community name.</param>
         /// <param name="variables">Variable binds.</param>
         /// <returns></returns>
-        public static async Task<IList<Variable>> SetAsync(VersionCode version, IPEndPoint endpoint, OctetString community, IList<Variable> variables)
+        public static async Task<IList<Variable>> SetAsync(VersionCode version, IPEndPoint endpoint, OctetString community, List<Variable> variables)
         {
             if (endpoint == null)
             {
@@ -345,7 +345,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="variables">Variable bindings.</param>
         /// <remarks>This method only supports SNMP v1.</remarks>
         [CLSCompliant(false)]
-        public static async Task SendTrapV1Async(EndPoint receiver, IPAddress agent, OctetString community, ObjectIdentifier enterprise, GenericCode generic, int specific, uint timestamp, IList<Variable> variables)
+        public static async Task SendTrapV1Async(EndPoint receiver, IPAddress agent, OctetString community, ObjectIdentifier enterprise, GenericCode generic, int specific, uint timestamp, List<Variable> variables)
         {
             var message = new TrapV1Message(VersionCode.V1, agent, community, enterprise, generic, specific, timestamp, variables);
             await message.SendAsync(receiver).ConfigureAwait(false);
@@ -363,7 +363,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="requestId">Request ID.</param>
         /// <remarks>This method only supports SNMP v2c.</remarks>
         [CLSCompliant(false)]
-        public static async Task SendTrapV2Async(int requestId, VersionCode version, EndPoint receiver, OctetString community, ObjectIdentifier enterprise, uint timestamp, IList<Variable> variables)
+        public static async Task SendTrapV2Async(int requestId, VersionCode version, EndPoint receiver, OctetString community, ObjectIdentifier enterprise, uint timestamp, List<Variable> variables)
         {
             if (version != VersionCode.V2)
             {
@@ -389,7 +389,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <remarks>This method supports SNMP v2c and v3.</remarks>
         [CLSCompliant(false)]
         [Obsolete("Please use other overloading ones.")]
-        public static async Task SendInformAsync(int requestId, VersionCode version, IPEndPoint receiver, OctetString community, ObjectIdentifier enterprise, uint timestamp, IList<Variable> variables, IPrivacyProvider privacy, ISnmpMessage report)
+        public static async Task SendInformAsync(int requestId, VersionCode version, IPEndPoint receiver, OctetString community, ObjectIdentifier enterprise, uint timestamp, List<Variable> variables, IPrivacyProvider privacy, ISnmpMessage report)
             => await SendInformAsync(requestId, version, receiver, community, OctetString.Empty,  enterprise, timestamp, variables, privacy, report);
 
         /// <summary>
@@ -407,7 +407,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="report">The report.</param>
         /// <remarks>This method supports SNMP v2c and v3.</remarks>
         [CLSCompliant(false)]
-        public static async Task SendInformAsync(int requestId, VersionCode version, IPEndPoint receiver, OctetString community, OctetString contextName, ObjectIdentifier enterprise, uint timestamp, IList<Variable> variables, IPrivacyProvider privacy, ISnmpMessage report)
+        public static async Task SendInformAsync(int requestId, VersionCode version, IPEndPoint receiver, OctetString community, OctetString contextName, ObjectIdentifier enterprise, uint timestamp, List<Variable> variables, IPrivacyProvider privacy, ISnmpMessage report)
         {
             if (receiver == null)
             {
@@ -599,7 +599,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="timeout">The time-out value, in milliseconds. The default value is 0, which indicates an infinite time-out period. Specifying -1 also indicates an infinite time-out period.</param>
         /// <returns></returns>
         /// <remarks>This method supports SNMP v1 and v2c.</remarks>
-        public static IList<Variable> Get(VersionCode version, IPEndPoint endpoint, OctetString community, IList<Variable> variables, int timeout)
+        public static IList<Variable> Get(VersionCode version, IPEndPoint endpoint, OctetString community, List<Variable> variables, int timeout)
         {
             if (endpoint == null)
             {
@@ -645,7 +645,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="timeout">The time-out value, in milliseconds. The default value is 0, which indicates an infinite time-out period. Specifying -1 also indicates an infinite time-out period.</param>
         /// <returns></returns>
         /// <remarks>This method supports SNMP v1 and v2c.</remarks>
-        public static IList<Variable> Set(VersionCode version, IPEndPoint endpoint, OctetString community, IList<Variable> variables, int timeout)
+        public static IList<Variable> Set(VersionCode version, IPEndPoint endpoint, OctetString community, List<Variable> variables, int timeout)
         {
             if (endpoint == null)
             {
@@ -864,7 +864,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="variables">Variable bindings.</param>
         /// <remarks>This method supports SNMP v1.</remarks>
         [CLSCompliant(false)]
-        public static void SendTrapV1(EndPoint receiver, IPAddress agent, OctetString community, ObjectIdentifier enterprise, GenericCode generic, int specific, uint timestamp, IList<Variable> variables)
+        public static void SendTrapV1(EndPoint receiver, IPAddress agent, OctetString community, ObjectIdentifier enterprise, GenericCode generic, int specific, uint timestamp, List<Variable> variables)
         {
             var message = new TrapV1Message(VersionCode.V1, agent, community, enterprise, generic, specific, timestamp, variables);
             message.Send(receiver);
@@ -882,7 +882,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="requestId">Request ID.</param>
         /// <remarks>This method supports SNMP v2c.</remarks>
         [CLSCompliant(false)]
-        public static void SendTrapV2(int requestId, VersionCode version, EndPoint receiver, OctetString community, ObjectIdentifier enterprise, uint timestamp, IList<Variable> variables)
+        public static void SendTrapV2(int requestId, VersionCode version, EndPoint receiver, OctetString community, ObjectIdentifier enterprise, uint timestamp, List<Variable> variables)
         {
             if (version != VersionCode.V2)
             {
@@ -909,7 +909,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <remarks>This method supports SNMP v2c and v3.</remarks>
         [CLSCompliant(false)]
         [Obsolete("Please use other overloading ones.")]
-        public static void SendInform(int requestId, VersionCode version, IPEndPoint receiver, OctetString community, ObjectIdentifier enterprise, uint timestamp, IList<Variable> variables, int timeout, IPrivacyProvider privacy, ISnmpMessage report)
+        public static void SendInform(int requestId, VersionCode version, IPEndPoint receiver, OctetString community, ObjectIdentifier enterprise, uint timestamp, List<Variable> variables, int timeout, IPrivacyProvider privacy, ISnmpMessage report)
             => SendInform(requestId, version, receiver, community, OctetString.Empty, enterprise, timestamp, variables, timeout, privacy, report);
      
         /// <summary>
@@ -928,7 +928,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="report">The report.</param>
         /// <remarks>This method supports SNMP v2c and v3.</remarks>
         [CLSCompliant(false)]
-        public static void SendInform(int requestId, VersionCode version, IPEndPoint receiver, OctetString community, OctetString contextName, ObjectIdentifier enterprise, uint timestamp, IList<Variable> variables, int timeout, IPrivacyProvider privacy, ISnmpMessage report)
+        public static void SendInform(int requestId, VersionCode version, IPEndPoint receiver, OctetString community, OctetString contextName, ObjectIdentifier enterprise, uint timestamp, List<Variable> variables, int timeout, IPrivacyProvider privacy, ISnmpMessage report)
         {
             if (receiver == null)
             {

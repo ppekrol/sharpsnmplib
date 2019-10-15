@@ -77,7 +77,7 @@ namespace Lextm.SharpSnmpLib
         /// Variable bindings.
         /// </summary>
         /// <value>Returns an empty list.</value>
-        public IList<Variable> Variables
+        public List<Variable> Variables
         {
             // as we cannot extract PDU data in such cases, only an empty list can be returned here.
             get { return new List<Variable>(0); }
@@ -92,6 +92,10 @@ namespace Lextm.SharpSnmpLib
         public override string ToString()
         {
             return "Malformed PDU";
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

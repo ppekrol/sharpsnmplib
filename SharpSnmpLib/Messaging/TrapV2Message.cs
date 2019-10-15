@@ -41,7 +41,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="variables">Variables.</param>
         /// <param name="requestId">Request ID.</param>
         [CLSCompliant(false)]
-        public TrapV2Message(int requestId, VersionCode version, OctetString community, ObjectIdentifier enterprise, uint time, IList<Variable> variables)
+        public TrapV2Message(int requestId, VersionCode version, OctetString community, ObjectIdentifier enterprise, uint time, List<Variable> variables)
         {
             if (variables == null)
             {
@@ -94,7 +94,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="engineBoots">The engine boots.</param>
         /// <param name="engineTime">The engine time.</param>
         [CLSCompliant(false)]
-        public TrapV2Message(VersionCode version, int messageId, int requestId, OctetString userName, ObjectIdentifier enterprise, uint time, IList<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, OctetString engineId, int engineBoots, int engineTime)
+        public TrapV2Message(VersionCode version, int messageId, int requestId, OctetString userName, ObjectIdentifier enterprise, uint time, List<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, OctetString engineId, int engineBoots, int engineTime)
         {
             if (userName == null)
             {
@@ -255,6 +255,10 @@ namespace Lextm.SharpSnmpLib.Messaging
                 this.Community(),
                 Enterprise,
                 this.Variables().Count.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

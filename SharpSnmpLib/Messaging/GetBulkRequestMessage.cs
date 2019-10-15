@@ -48,7 +48,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="nonRepeaters">Non-repeaters.</param>
         /// <param name="maxRepetitions">Max repetitions.</param>
         /// <param name="variables">Variables.</param>
-        public GetBulkRequestMessage(int requestId, VersionCode version, OctetString community, int nonRepeaters, int maxRepetitions, IList<Variable> variables)
+        public GetBulkRequestMessage(int requestId, VersionCode version, OctetString community, int nonRepeaters, int maxRepetitions, List<Variable> variables)
         {
             if (variables == null)
             {
@@ -102,7 +102,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="privacy">The privacy provider.</param>
         /// <param name="report">The report.</param>
         [Obsolete("Please use other overloading ones.")]
-        public GetBulkRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, int nonRepeaters, int maxRepetitions, IList<Variable> variables, IPrivacyProvider privacy, ISnmpMessage report)
+        public GetBulkRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, int nonRepeaters, int maxRepetitions, List<Variable> variables, IPrivacyProvider privacy, ISnmpMessage report)
             : this(version, messageId, requestId, userName, nonRepeaters, maxRepetitions, variables, privacy, 0xFFE3, report)
         {
         }
@@ -121,7 +121,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="privacy">The privacy provider.</param>
         /// <param name="maxMessageSize">Size of the max message.</param>
         /// <param name="report">The report.</param>
-        public GetBulkRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, OctetString contextName, int nonRepeaters, int maxRepetitions, IList<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, ISnmpMessage report)
+        public GetBulkRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, OctetString contextName, int nonRepeaters, int maxRepetitions, List<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, ISnmpMessage report)
         {
             if (variables == null)
             {
@@ -204,7 +204,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="privacy">The privacy provider.</param>
         /// <param name="maxMessageSize">Size of the max message.</param>
         /// <param name="report">The report.</param>
-        public GetBulkRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, int nonRepeaters, int maxRepetitions, IList<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, ISnmpMessage report) 
+        public GetBulkRequestMessage(VersionCode version, int messageId, int requestId, OctetString userName, int nonRepeaters, int maxRepetitions, List<Variable> variables, IPrivacyProvider privacy, int maxMessageSize, ISnmpMessage report) 
             : this(version, messageId, requestId, userName, OctetString.Empty, nonRepeaters, maxRepetitions, variables, privacy, maxMessageSize, report)
         {
         }
@@ -285,6 +285,10 @@ namespace Lextm.SharpSnmpLib.Messaging
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture, "GET BULK request message: version: {0}; {1}; {2}", Version, Parameters.UserName, Scope.Pdu);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

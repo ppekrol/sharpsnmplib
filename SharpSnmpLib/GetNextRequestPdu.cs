@@ -47,7 +47,7 @@ namespace Lextm.SharpSnmpLib
         /// </summary>
         /// <param name="requestId">The request id.</param>
         /// <param name="variables">Variables</param>
-        public GetNextRequestPdu(int requestId, IList<Variable> variables)
+        public GetNextRequestPdu(int requestId, List<Variable> variables)
         {
             if (variables == null)
             {
@@ -107,7 +107,7 @@ namespace Lextm.SharpSnmpLib
         /// <summary>
         /// Variables.
         /// </summary>
-        public IList<Variable> Variables { get; private set; }
+        public List<Variable> Variables { get; private set; }
 
         #region ISnmpData Members
         /// <summary>
@@ -135,6 +135,10 @@ namespace Lextm.SharpSnmpLib
             }
 
             stream.AppendBytes(TypeCode, _length, _raw);
+        }
+
+        public void Dispose()
+        {
         }
 
         #endregion

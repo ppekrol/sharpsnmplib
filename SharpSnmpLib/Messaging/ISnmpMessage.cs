@@ -27,13 +27,14 @@
  */
 
 using Lextm.SharpSnmpLib.Security;
+using System;
 
 namespace Lextm.SharpSnmpLib.Messaging
 {
     /// <summary>
     /// SNMP message.
     /// </summary>
-    public interface ISnmpMessage
+    public interface ISnmpMessage : IDisposable
     {
         /// <summary>
         /// Gets the header.

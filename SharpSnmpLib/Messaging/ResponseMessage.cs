@@ -48,7 +48,7 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// <param name="error">Error code.</param>
         /// <param name="index">Error index.</param>
         /// <param name="variables">Variables.</param>
-        public ResponseMessage(int requestId, VersionCode version, OctetString community, ErrorCode error, int index, IList<Variable> variables)
+        public ResponseMessage(int requestId, VersionCode version, OctetString community, ErrorCode error, int index, List<Variable> variables)
         {
             if (variables == null)
             {
@@ -169,6 +169,24 @@ namespace Lextm.SharpSnmpLib.Messaging
         /// </summary>
         /// <value>The scope.</value>
         public Scope Scope { get; private set; }
+
+        private bool _disposed;
+
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            lock (this)
+            {
+                if (_disposed)
+                    return;
+
+                _disposed = true;
+
+                Scope?.Pdu?.Dispose();
+            }
+        }
 
         /// <summary>
         /// Converts to byte format.
