@@ -29,7 +29,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 
 namespace Lextm.SharpSnmpLib
 {
@@ -147,7 +146,10 @@ namespace Lextm.SharpSnmpLib
             }
 
             var varbinds = new List<ISnmpData>(variables.Count);
-            varbinds.AddRange(variables.Select(v => new Sequence(null, v.Id, v.Data)).Cast<ISnmpData>());
+            foreach (var variable in variables)
+            {
+                varbinds.Add(new Sequence(null, variable.Id, variable.Data));
+            }
 
             var result = new Sequence(varbinds);
             return result;

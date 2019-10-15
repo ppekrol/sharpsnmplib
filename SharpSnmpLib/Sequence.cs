@@ -30,7 +30,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace Lextm.SharpSnmpLib
@@ -54,20 +53,80 @@ namespace Lextm.SharpSnmpLib
             return _list.GetEnumerator();
         }
 
+        public Sequence(byte[] length)
+            : this(length, null, null, null, null, null, null)
+        {
+
+        }
+
+        public Sequence(byte[] length, ISnmpData item1)
+            : this(length, item1, null, null, null, null, null)
+        {
+
+        }
+
+        public Sequence(byte[] length, ISnmpData item1, ISnmpData item2)
+            : this(length, item1, item2, null, null, null, null)
+        {
+        }
+
+        public Sequence(byte[] length, ISnmpData item1, ISnmpData item2, ISnmpData item3)
+            : this(length, item1, item2, item3, null, null, null)
+        {
+
+        }
+
+        public Sequence(byte[] length, ISnmpData item1, ISnmpData item2, ISnmpData item3, ISnmpData item4)
+            : this(length, item1, item2, item3, item4, null, null)
+        {
+
+        }
+
+        public Sequence(byte[] length, ISnmpData item1, ISnmpData item2, ISnmpData item3, ISnmpData item4, ISnmpData item5)
+            : this(length, item1, item2, item3, item4, item5, null)
+        {
+        }
+
+
+        public Sequence(byte[] length, ISnmpData item1, ISnmpData item2, ISnmpData item3, ISnmpData item4, ISnmpData item5, ISnmpData item6)
+        {
+            AddItem(item1);
+            AddItem(item2);
+            AddItem(item3);
+            AddItem(item4);
+            AddItem(item5);
+            AddItem(item6);
+
+            _length = length;
+
+            void AddItem(ISnmpData item)
+            {
+                if (item == null)
+                    return;
+
+                _list.Add(item);
+            }
+        }
+
         /// <summary>
         /// Creates an <see cref="Sequence"/> instance with varied <see cref="ISnmpData"/> instances.
         /// </summary>
         /// <param name="length">The length bytes.</param>
         /// <param name="items">The items.</param>
-        public Sequence(byte[] length, params ISnmpData[] items)
+        public Sequence(byte[] length, ISnmpData[] items)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            foreach (var data in items.Where(data => data != null))
+            foreach (var data in items)
             {
+                if (data == null)
+                {
+                    continue;
+                }
+
                 _list.Add(data);
             }
 
@@ -85,8 +144,13 @@ namespace Lextm.SharpSnmpLib
                 throw new ArgumentNullException(nameof(items));
             }
 
-            foreach (var data in items.Where(data => data != null))
+            foreach (var data in items)
             {
+                if (data == null)
+                {
+                    continue;
+                }
+
                 _list.Add(data);
             }
         }
@@ -137,7 +201,7 @@ namespace Lextm.SharpSnmpLib
         {
             get { return _list[index]; }
         }
-        
+
         /// <summary>
         /// Type code.
         /// </summary>
@@ -176,7 +240,7 @@ namespace Lextm.SharpSnmpLib
             {
                 result.Append(item).Append("; ");
             }
-            
+
             return result.ToString();
         }
 
