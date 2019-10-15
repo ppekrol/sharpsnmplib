@@ -27,6 +27,7 @@
  */
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -51,19 +52,27 @@ namespace Lextm.SharpSnmpLib
             {
                 throw new ArgumentNullException(nameof(description));
             }
-            
-            var result = new List<byte>();
-            var content = description.Trim().Split(new[] { ' ' });
-            foreach (var part in content)
-            {
-                byte temp;
-                if (byte.TryParse(part, out temp))
-                {
-                    result.Add(temp);
-                }
-            }
 
-            return result.ToArray();
+            var result = Pools.GetByteList();
+
+            try
+            {
+                var content = description.Trim().Split(' ');
+                foreach (var part in content)
+                {
+                    byte temp;
+                    if (byte.TryParse(part, out temp))
+                    {
+                        result.Add(temp);
+                    }
+                }
+
+                return result.ToArray();
+            }
+            finally
+            {
+                Pools.ReturnByteList(result);
+            }
         }
 
         /// <summary>
@@ -79,40 +88,48 @@ namespace Lextm.SharpSnmpLib
                 throw new ArgumentNullException(nameof(description));
             }
 
-            var result = new List<byte>();
-            var buffer = new StringBuilder(2);
-            foreach (var c in description)
+            var result = Pools.GetByteList();
+
+            try
             {
-                if (char.IsWhiteSpace(c))
+                var buffer = new StringBuilder(2);
+                foreach (var c in description)
                 {
-                    continue;
+                    if (char.IsWhiteSpace(c))
+                    {
+                        continue;
+                    }
+
+                    if (!char.IsLetterOrDigit(c))
+                    {
+                        throw new ArgumentException("Illegal character found.", nameof(description));
+                    }
+
+                    buffer.Append(c);
+                    if (buffer.Length != 2)
+                    {
+                        continue;
+                    }
+                    byte temp;
+                    if (byte.TryParse(buffer.ToString(), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out temp))
+                    {
+                        result.Add(temp);
+                    }
+
+                    buffer.Length = 0;
                 }
 
-                if (!char.IsLetterOrDigit(c))
+                if (buffer.Length != 0)
                 {
-                    throw new ArgumentException("Illegal character found.", nameof(description));
-                }
-                
-                buffer.Append(c);
-                if (buffer.Length != 2)
-                {
-                    continue;
-                }
-                byte temp;
-                if (byte.TryParse(buffer.ToString(), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out temp))
-                {
-                    result.Add(temp);
+                    throw new ArgumentException("Not a complete byte string.", nameof(description));
                 }
 
-                buffer.Length = 0;
+                return result.ToArray();
             }
-            
-            if (buffer.Length != 0)
+            finally
             {
-                throw new ArgumentException("Not a complete byte string.", nameof(description));
+                Pools.ReturnByteList(result);
             }
-            
-            return result.ToArray();
         }
 
         /// <summary>
@@ -149,7 +166,7 @@ namespace Lextm.SharpSnmpLib
 
                     item.AppendBytesTo(result);
                 }
-                
+
                 return result.ToArray();
             }
         }
@@ -167,7 +184,7 @@ namespace Lextm.SharpSnmpLib
                 {
                     item.AppendBytesTo(result);
                 }
-                
+
                 return result.ToArray();
             }
         }
@@ -192,27 +209,36 @@ namespace Lextm.SharpSnmpLib
                 sign = 0x0;
             }
 
-            var list = new List<byte>(orig);
-            while (list.Count > 1)
-            {
-                if (list[list.Count - 1] == flag)
-                {
-                    list.RemoveAt(list.Count - 1);
-                }
-                else
-                {
-                    break;
-                }
-            }
+            var list = Pools.GetByteList();
+            list.AddRange(orig);
 
-            // if sign bit is not correct, add an extra byte
-            if ((list[list.Count - 1] & 0x80) != sign)
+            try
             {
-                list.Add(flag);
-            }
+                while (list.Count > 1)
+                {
+                    if (list[list.Count - 1] == flag)
+                    {
+                        list.RemoveAt(list.Count - 1);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
 
-            list.Reverse();
-            return list.ToArray();
+                // if sign bit is not correct, add an extra byte
+                if ((list[list.Count - 1] & 0x80) != sign)
+                {
+                    list.Add(flag);
+                }
+
+                list.Reverse();
+                return list.ToArray();
+            }
+            finally
+            {
+                Pools.ReturnByteList(list);
+            }
         }
 
         /// <summary>
@@ -241,14 +267,7 @@ namespace Lextm.SharpSnmpLib
                 throw new ArgumentNullException(nameof(data));
             }
 
-            var items = new[] 
-            {
-                new Integer32((int)version),
-                header.GetData(version),
-                parameters.GetData(version),
-                data
-            };
-            return new Sequence(length, items);
+            return new Sequence(length, new Integer32((int)version), header.GetData(version), parameters.GetData(version), data);
         }
 
         internal static byte[] WritePayloadLength(this int length) // excluding initial octet
@@ -265,23 +284,31 @@ namespace Lextm.SharpSnmpLib
                 stream.WriteByte((byte)length);
                 return stream.ToArray();
             }
-            
-            var c = new byte[16];
-            var j = 0;
-            while (length > 0)
-            {
-                c[j++] = (byte)(length & 0xff);
-                length = length >> 8;
-            }
-            
-            stream.WriteByte((byte)(0x80 | j));
-            while (j > 0)
-            {
-                int x = c[--j];
-                stream.WriteByte((byte)x);
-            }
 
-            return stream.ToArray();
+            var c = ArrayPool<byte>.Shared.Rent(16);
+
+            try
+            {
+                var j = 0;
+                while (length > 0)
+                {
+                    c[j++] = (byte)(length & 0xff);
+                    length = length >> 8;
+                }
+
+                stream.WriteByte((byte)(0x80 | j));
+                while (j > 0)
+                {
+                    int x = c[--j];
+                    stream.WriteByte((byte)x);
+                }
+
+                return stream.ToArray();
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(c);
+            }
         }
     }
 }
