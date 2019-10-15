@@ -18,6 +18,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -126,7 +127,7 @@ namespace Lextm.SharpSnmpLib.Messaging
             return message.Parameters.UserName;
         }
 
-#region sync methods
+        #region sync methods
 
         /// <summary>
         /// Sends an <see cref="ISnmpMessage"/>.
@@ -333,54 +334,61 @@ namespace Lextm.SharpSnmpLib.Messaging
 
             var bytes = request.ToBytes();
             var bufSize = udpSocket.ReceiveBufferSize = Messenger.MaxMessageSize;
-            var reply = new byte[bufSize];
+            var reply = ArrayPool<byte>.Shared.Rent(bufSize);
 
-            // Whatever you change, try to keep the Send and the Receive close to each other.
-            udpSocket.SendTo(bytes, receiver);
-            udpSocket.ReceiveTimeout = timeout;
-            int count;
             try
             {
-                count = udpSocket.Receive(reply, 0, bufSize, SocketFlags.None);
+                // Whatever you change, try to keep the Send and the Receive close to each other.
+                udpSocket.SendTo(bytes, receiver);
+                udpSocket.ReceiveTimeout = timeout;
+                int count;
+                try
+                {
+                    count = udpSocket.Receive(reply, 0, bufSize, SocketFlags.None);
+                }
+                catch (SocketException ex)
+                {
+                    // IMPORTANT: Mono behavior.
+                    if (IsRunningOnMono && ex.SocketErrorCode == SocketError.WouldBlock)
+                    {
+                        throw TimeoutException.Create(receiver.Address, timeout);
+                    }
+
+
+                    if (ex.SocketErrorCode == SocketError.TimedOut)
+                    {
+                        throw TimeoutException.Create(receiver.Address, timeout);
+                    }
+
+                    throw;
+                }
+
+                // Passing 'count' is not necessary because ParseMessages should ignore it, but it offer extra safety (and would avoid an issue if parsing >1 response).
+                var response = MessageFactory.ParseMessages(reply, 0, count, registry)[0];
+                var responseCode = response.TypeCode();
+                if (responseCode == SnmpType.ResponsePdu || responseCode == SnmpType.ReportPdu)
+                {
+                    var requestId = request.MessageId();
+                    var responseId = response.MessageId();
+                    if (responseId != requestId)
+                    {
+                        throw OperationException.Create(string.Format(CultureInfo.InvariantCulture, "wrong response sequence: expected {0}, received {1}", requestId, responseId), receiver.Address);
+                    }
+
+                    return response;
+                }
+
+                throw OperationException.Create(string.Format(CultureInfo.InvariantCulture, "wrong response type: {0}", responseCode), receiver.Address);
             }
-            catch (SocketException ex)
+            finally
             {
-                // IMPORTANT: Mono behavior.
-                if (IsRunningOnMono && ex.SocketErrorCode == SocketError.WouldBlock)
-                {
-                    throw TimeoutException.Create(receiver.Address, timeout);
-                }
-
-
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    throw TimeoutException.Create(receiver.Address, timeout);
-                }
-
-                throw;
+                ArrayPool<byte>.Shared.Return(reply);
             }
-
-            // Passing 'count' is not necessary because ParseMessages should ignore it, but it offer extra safety (and would avoid an issue if parsing >1 response).
-            var response = MessageFactory.ParseMessages(reply, 0, count, registry)[0];
-            var responseCode = response.TypeCode();
-            if (responseCode == SnmpType.ResponsePdu || responseCode == SnmpType.ReportPdu)
-            {
-                var requestId = request.MessageId();
-                var responseId = response.MessageId();
-                if (responseId != requestId)
-                {
-                    throw OperationException.Create(string.Format(CultureInfo.InvariantCulture, "wrong response sequence: expected {0}, received {1}", requestId, responseId), receiver.Address);
-                }
-
-                return response;
-            }
-
-            throw OperationException.Create(string.Format(CultureInfo.InvariantCulture, "wrong response type: {0}", responseCode), receiver.Address);
         }
 
-#endregion
+        #endregion
 
-#region async methods
+        #region async methods
 #if NET452
         /// <summary>
         /// Ends a pending asynchronous read.
@@ -695,56 +703,63 @@ namespace Lextm.SharpSnmpLib.Messaging
             }
 
             int count;
-            var reply = new byte[bufSize];
+            var reply = ArrayPool<byte>.Shared.Rent(bufSize);
 
-            // IMPORTANT: follow http://blogs.msdn.com/b/pfxteam/archive/2011/12/15/10248293.aspx
-            var args = SocketExtension.EventArgsFactory.Create();
-            var remoteAddress = udpSocket.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any;
-            EndPoint remote = new IPEndPoint(remoteAddress, 0);
             try
             {
-                args.RemoteEndPoint = remote;
-                args.SetBuffer(reply, 0, bufSize);
-                using (var awaitable = new SocketAwaitable(args))
+                // IMPORTANT: follow http://blogs.msdn.com/b/pfxteam/archive/2011/12/15/10248293.aspx
+                var args = SocketExtension.EventArgsFactory.Create();
+                var remoteAddress = udpSocket.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any;
+                EndPoint remote = new IPEndPoint(remoteAddress, 0);
+                try
                 {
-                    count = await udpSocket.ReceiveMessageFromAsync(awaitable);
+                    args.RemoteEndPoint = remote;
+                    args.SetBuffer(reply, 0, bufSize);
+                    using (var awaitable = new SocketAwaitable(args))
+                    {
+                        count = await udpSocket.ReceiveMessageFromAsync(awaitable);
+                    }
                 }
+                catch (SocketException ex)
+                {
+                    // IMPORTANT: Mono behavior (https://bugzilla.novell.com/show_bug.cgi?id=599488)
+                    if (IsRunningOnMono && ex.SocketErrorCode == SocketError.WouldBlock)
+                    {
+                        throw TimeoutException.Create(receiver.Address, 0);
+                    }
+
+                    if (ex.SocketErrorCode == SocketError.TimedOut)
+                    {
+                        throw TimeoutException.Create(receiver.Address, 0);
+                    }
+
+                    throw;
+                }
+
+                // Passing 'count' is not necessary because ParseMessages should ignore it, but it offer extra safety (and would avoid an issue if parsing >1 response).
+                var response = MessageFactory.ParseMessages(reply, 0, count, registry)[0];
+                var responseCode = response.TypeCode();
+                if (responseCode == SnmpType.ResponsePdu || responseCode == SnmpType.ReportPdu)
+                {
+                    var requestId = request.MessageId();
+                    var responseId = response.MessageId();
+                    if (responseId != requestId)
+                    {
+                        throw OperationException.Create(string.Format(CultureInfo.InvariantCulture, "wrong response sequence: expected {0}, received {1}", requestId, responseId), receiver.Address);
+                    }
+
+                    return response;
+                }
+
+                throw OperationException.Create(string.Format(CultureInfo.InvariantCulture, "wrong response type: {0}", responseCode), receiver.Address);
             }
-            catch (SocketException ex)
+            finally
             {
-                // IMPORTANT: Mono behavior (https://bugzilla.novell.com/show_bug.cgi?id=599488)
-                if (IsRunningOnMono && ex.SocketErrorCode == SocketError.WouldBlock)
-                {
-                    throw TimeoutException.Create(receiver.Address, 0);
-                }
-
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    throw TimeoutException.Create(receiver.Address, 0);
-                }
-
-                throw;
+                ArrayPool<byte>.Shared.Return(reply);
             }
-
-            // Passing 'count' is not necessary because ParseMessages should ignore it, but it offer extra safety (and would avoid an issue if parsing >1 response).
-            var response = MessageFactory.ParseMessages(reply, 0, count, registry)[0];
-            var responseCode = response.TypeCode();
-            if (responseCode == SnmpType.ResponsePdu || responseCode == SnmpType.ReportPdu)
-            {
-                var requestId = request.MessageId();
-                var responseId = response.MessageId();
-                if (responseId != requestId)
-                {
-                    throw OperationException.Create(string.Format(CultureInfo.InvariantCulture, "wrong response sequence: expected {0}, received {1}", requestId, responseId), receiver.Address);
-                }
-
-                return response;
-            }
-
-            throw OperationException.Create(string.Format(CultureInfo.InvariantCulture, "wrong response type: {0}", responseCode), receiver.Address);
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Tests if running on Mono.
