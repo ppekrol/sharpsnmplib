@@ -18,6 +18,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Buffers;
 using System.IO;
 
 namespace Lextm.SharpSnmpLib
@@ -37,11 +38,24 @@ namespace Lextm.SharpSnmpLib
             {
                 throw new ArgumentNullException(nameof(data));
             }
-                
-            using (var result = new MemoryStream())
+
+            var buffer = ArrayPool<byte>.Shared.Rent(1024 * 1024);
+
+            using (var result = new MemoryStream(buffer, 0, buffer.Length))
             {
-                data.AppendBytesTo(result);
-                return result.ToArray();
+                try
+                {
+                    data.AppendBytesTo(result);
+
+                    var array = new byte[result.Position];
+                    Buffer.BlockCopy(buffer, 0, array, 0, array.Length);
+
+                    return array;
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
             }
         }
     }
