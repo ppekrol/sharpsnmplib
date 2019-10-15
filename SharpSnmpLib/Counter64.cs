@@ -18,6 +18,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -42,7 +43,7 @@ namespace Lextm.SharpSnmpLib
         {
             // IMPORTANT: for test project only.
         }
-        
+
         /// <summary>
         /// Creates a <see cref="Counter64"/> with a specific <see cref="UInt64"/>.
         /// </summary>
@@ -82,20 +83,27 @@ namespace Lextm.SharpSnmpLib
                 throw new ArgumentException("If byte length is 5, then first byte must be empty.", nameof(length));
             }
 
-            var list = new List<byte>(_raw);
-            list.Reverse();
-            while (list.Count > 8)
+            var array = ArrayPool<byte>.Shared.Rent(8);
+            try
             {
-                list.RemoveAt(list.Count - 1);
-            }
+                for (var i = 0; i < 8; i++)
+                {
+                    if (i >= _raw.Length)
+                    {
+                        array[i] = 0;
+                        continue;
+                    }
 
-            while (list.Count < 8)
+                    array[i] = _raw[_raw.Length - 1 - i];
+                }
+
+                _count = BitConverter.ToUInt64(array, 0);
+                _length = length.Item2;
+            }
+            finally
             {
-                list.Add(0);
+                ArrayPool<byte>.Shared.Return(array);
             }
-
-            _count = BitConverter.ToUInt64(list.ToArray(), 0);
-            _length = length.Item2;
         }
 
         #region ISnmpData Members
@@ -106,7 +114,7 @@ namespace Lextm.SharpSnmpLib
         {
             get { return SnmpType.Counter64; }
         }
-        
+
         /// <summary>
         /// Appends the bytes to <see cref="Stream"/>.
         /// </summary>
@@ -117,7 +125,7 @@ namespace Lextm.SharpSnmpLib
             {
                 throw new ArgumentNullException(nameof(stream));
             }
-            
+
             stream.AppendBytes(TypeCode, _length, GetRaw());
         }
 
@@ -131,7 +139,7 @@ namespace Lextm.SharpSnmpLib
         {
             return _count;
         }
-        
+
         /// <summary>
         /// Returns a <see cref="String"/> that represents this <see cref="Counter64"/>.
         /// </summary>
@@ -160,7 +168,7 @@ namespace Lextm.SharpSnmpLib
         {
             return Equals(this, other);
         }
-        
+
         /// <summary>
         /// Determines whether the specified <see cref="Object"/> is equal to the current <see cref="Counter64"/>.
         /// </summary>
@@ -171,7 +179,7 @@ namespace Lextm.SharpSnmpLib
         {
             return Equals(this, obj as Counter64);
         }
-        
+
         /// <summary>
         /// Serves as a hash function for a particular type.
         /// </summary>
@@ -180,7 +188,7 @@ namespace Lextm.SharpSnmpLib
         {
             return ToUInt64().GetHashCode();
         }
-        
+
         /// <summary>
         /// The equality operator.
         /// </summary>
@@ -192,7 +200,7 @@ namespace Lextm.SharpSnmpLib
         {
             return Equals(left, right);
         }
-        
+
         /// <summary>
         /// The inequality operator.
         /// </summary>
@@ -204,7 +212,7 @@ namespace Lextm.SharpSnmpLib
         {
             return !(left == right);
         }
-        
+
         /// <summary>
         /// The comparison.
         /// </summary>
@@ -225,7 +233,7 @@ namespace Lextm.SharpSnmpLib
             {
                 return false;
             }
-            
+
             return left.ToUInt64() == right.ToUInt64();
         }
     }
